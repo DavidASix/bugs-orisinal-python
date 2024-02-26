@@ -3,7 +3,7 @@ from game import Game
 
 def main():
     pygame.init()
-    WIDTH, HEIGHT = 300, 300
+    WIDTH, HEIGHT = 600, 600
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
     # Create a Game instance and start the game loop

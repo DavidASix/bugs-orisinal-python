@@ -2,6 +2,8 @@ import pygame
 import math
 
 from player import Player
+from bubble import Bubble
+
 import constants as c
 
 class Game:
@@ -14,6 +16,7 @@ class Game:
     def game_loop(self):
         width, height = self.screen.get_size()
         player = Player()
+        bubble = None
         while self.running:
             # Event handling
             for event in pygame.event.get():
@@ -23,10 +26,11 @@ class Game:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
-                player.handle_events(event)
-
-            player.grow_circle_on_click()
-            player.show_flash_on_release()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if bubble is None:
+                        bubble = Bubble()
+                elif event.type == pygame.MOUSEBUTTONUP:
+                        bubble.flash_counter = 1
                         
             # Get the mouse position and update player facing direction
             current_mouse_pos = pygame.mouse.get_pos()
@@ -37,7 +41,16 @@ class Game:
 
             # Draw the game
             self.screen.fill(c.WHITE)
+            if bubble is not None:
+                bubble.show_flash_on_release()
+                bubble.grow_circle_on_click()
+                bubble.update_position(player.x, player.y)
+                bubble.draw(self.screen)
+                if bubble.destroy_bubble:
+                    bubble = None
+                    
             player.draw(self.screen)
+
             # Update the display
             pygame.display.flip()
             self.clock.tick(c.FPS)
