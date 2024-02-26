@@ -3,6 +3,7 @@ import math
 
 from player import Player
 from bubble import Bubble
+from bug import Bug
 
 import constants as c
 
@@ -17,6 +18,7 @@ class Game:
         width, height = self.screen.get_size()
         player = Player()
         bubble = None
+        bug = Bug(width, height)
         while self.running:
             # Event handling
             for event in pygame.event.get():
@@ -31,7 +33,8 @@ class Game:
                         bubble = Bubble()
                 elif event.type == pygame.MOUSEBUTTONUP:
                         bubble.flash_counter = 1
-                        
+            
+            # PLAYER AND BUBBLE LOGIC
             # Get the mouse position and update player facing direction
             current_mouse_pos = pygame.mouse.get_pos()
             player.update_direction(self.last_mouse_pos, current_mouse_pos)
@@ -50,6 +53,10 @@ class Game:
                     bubble = None
                     
             player.draw(self.screen)
+
+            # BUG LOGIC
+            bug.move()
+            bug.draw(self.screen)
 
             # Update the display
             pygame.display.flip()
