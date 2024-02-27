@@ -18,7 +18,9 @@ class Bubble:
             self.size = min(self.size + c.INCREMENT_SIZE, c.MAX_CIRCLE_SIZE)
 
     def draw(self, screen):
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.size)
+        temp_surface = pygame.Surface((self.size*2, self.size*2), pygame.SRCALPHA)
+        pygame.draw.circle(temp_surface, self.color + (230,), (self.size, self.size), self.size)  # 128 is the alpha value
+        screen.blit(temp_surface, (self.x-self.size, self.y-self.size))
 
     def update_position(self, x, y):
         self.x = x

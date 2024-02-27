@@ -1,9 +1,12 @@
 import pygame
 import math
+import utilities as utils
 
 from player import Player
 from bubble import Bubble
 from bug import Bug
+from health import Health
+from score_board import ScoreBoard
 
 import constants as c
 
@@ -19,6 +22,8 @@ class Game:
         player = Player()
         bubble = None
         bugs = []
+        health = Health(3)
+        score_board = ScoreBoard(None, width)
         while self.running:
             # Event handling
             for event in pygame.event.get():
@@ -32,7 +37,20 @@ class Game:
                     if bubble is None:
                         bubble = Bubble()
                 elif event.type == pygame.MOUSEBUTTONUP:
-                        bubble.flash_counter = 1
+                        # A bubble could have been popped before the user let go of the mouse
+                        # If not, increase the bubble size, start it flashing, and check if it intersects any bugs
+                        # If it does, remove that bug
+                        if bubble is not None:
+                            bubble.size *= 1.75
+                            bubble.flash_counter = 1
+                            # Check if the larger bubble covered any bugs
+                            for bug in bugs:
+                                if utils.distance_between(bubble, bug) <= (bubble.size + bug.size):
+                                    print('Squished Bug!')
+                                    bugs.remove(bug)
+                                    score_board.increase()
+                                    #bug = None
+
             while len(bugs) < 20:
                 bugs.append(Bug(width, height))
 
@@ -56,12 +74,19 @@ class Game:
                 bubble.grow_circle_on_click()
                 bubble.update_position(player.x, player.y)
                 bubble.draw(self.screen)
+                # Handle bubble bug intersection
+                for bug in bugs:
+                    if utils.distance_between(bubble, bug) <= (bubble.size + bug.size) and not bubble.flash_counter:
+                        bubble.destroy_bubble = True
+                        health.lose_life()
+                        break
                 if bubble.destroy_bubble:
                     bubble = None
                     
             player.draw(self.screen)
 
-
+            health.draw(self.screen)
+            score_board.draw(self.screen)
             # Update the display
             pygame.display.flip()
             self.clock.tick(c.FPS)

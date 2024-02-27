@@ -10,6 +10,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 PINK = (255, 200, 200)
 LIGHT_PINK = (255, 230, 230)
+GREY = (100, 100, 100)
 
 # Bubble Values
 BASE_CIRCLE_SIZE = 20
