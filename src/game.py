@@ -29,7 +29,7 @@ class Game:
 
     def game_loop(self):
         width, height = self.screen.get_size()
-        player = Player()
+        player = Player(self.play_field)
         bubble = None
         bugs = []
         health = Health(3)
@@ -45,9 +45,11 @@ class Game:
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if bubble is None:
-                        bubble = Bubble()
+                    if event.button == 1:
+                        if bubble is None:
+                            bubble = Bubble()
                 elif event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1:
                         # A bubble could have been popped before the user let go of the mouse
                         # If not, increase the bubble size, start it flashing, and check if it intersects any bugs
                         # If it does, remove that bug
@@ -81,6 +83,14 @@ class Game:
             self.last_mouse_pos = pygame.mouse.get_pos()
             player.move_toward_mouse(height, current_mouse_pos)
 
+            # Player Bug Interaction Logic
+            if not player.jumping and not player.invincible: # And player not invincible
+                for bug in bugs:
+                    if utils.distance_between(player, bug) <= (player.size + bug.size):
+                        health.lose_life()
+                        self.running = health.current_health > 0
+                        player.invincible = 1
+
             # Bubble drawing logic
             if bubble is not None:
                 bubble.grow_circle_on_click()
@@ -109,11 +119,12 @@ class Game:
                             # Play ouch jump anim at player location
                             # make player invincible for 2 seconds
                             bubble.destroy_bubble = True
+                            player.invincible = 1
                             health.lose_life()
                             self.running = health.current_health > 0
                             break
                     
-            player.draw(self.play_field)
+            player.draw()
             overlay_image = pygame.transform.smoothscale(self.overlay_image, self.screen.get_size())
             self.play_field.blit(overlay_image, (0,0))
             # Blit the play_field onto the overlay (below clipping mask)

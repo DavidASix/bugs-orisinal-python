@@ -4,12 +4,18 @@ import math
 import constants as c
 
 class Player:
-    def __init__(self):
+    def __init__(self, screen):
+        self.screen = screen
         self.size = 20
         self.x = (c.WIDTH + self.size) / 2
         self.y = (c.HEIGHT + self.size) / 2
         self.color = c.GREEN
         self.direction = "S"
+        self.jumping = False
+        self.invincible = 0
+        self.ouch_animation = None
+        self.jump_animation = None
+        self.play_field = pygame.Surface(screen.get_size())
 
     def update_direction(self, last_mouse_pos, current_mouse_pos):
         if (last_mouse_pos and current_mouse_pos):
@@ -41,5 +47,22 @@ class Player:
             self.x -= (self.x - circle_center[0]) * (player_distance - circle_radius) / player_distance
             self.y -= (self.y - circle_center[1]) * (player_distance - circle_radius) / player_distance
     
-    def draw(self, screen):
-        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.size)
+    
+    def animation(self):
+        self.color = c.RED if self.jumping else c.GREEN
+        pygame.draw.circle(self.screen, self.color, (int(self.x), int(self.y)), self.size)
+
+
+    def draw(self):
+        flashing_seconds = 3
+        flashing_frames = flashing_seconds * c.FPS
+        flashing_interval = 3
+
+        # If the player is invincible, flash every 3 frames for 3 seconds
+        if self.invincible and self.invincible < flashing_frames:
+            if self.invincible % flashing_interval == 0:  
+                self.animation()
+            self.invincible += 1
+        else:
+            self.invincible = 0
+            self.animation()
