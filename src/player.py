@@ -20,6 +20,10 @@ class Player:
             self.direction = ns + ew
 
     def move_toward_mouse(self, frame_height, current_mouse_pos):
+        # Setup circular boundary for player
+        circle_radius = frame_height / 2
+        circle_center = (circle_radius, circle_radius)
+
         target_x, target_y = current_mouse_pos
         # Player should take 2.5 seconds to go from top to bottom of frame
         frame_speed = frame_height / 2.5 / c.FPS
@@ -30,6 +34,12 @@ class Player:
             self.x += (target_x - self.x) * frame_speed / distance
             self.y += (target_y - self.y) * frame_speed / distance
 
+        # Check if the player is outside the circle
+        player_distance = math.hypot(self.x - circle_center[0], self.y - circle_center[1])
+        if player_distance > circle_radius:
+            # Move the player back towards the circle
+            self.x -= (self.x - circle_center[0]) * (player_distance - circle_radius) / player_distance
+            self.y -= (self.y - circle_center[1]) * (player_distance - circle_radius) / player_distance
     
     def draw(self, screen):
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.size)
