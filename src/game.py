@@ -33,7 +33,6 @@ class Game:
         bugs = []
         health = Health(3)
         score_board = ScoreBoard(None, width)
-
         while self.running:
             # Event handling
             for event in pygame.event.get():
@@ -63,6 +62,9 @@ class Game:
 
             while len(bugs) < 20:
                 bugs.append(Bug(width, height))
+            music_file = './assets/sounds/loop.mp3'
+            pygame.mixer.music.load(music_file)
+            pygame.mixer.music.play(-1)
 
             # Fill the background with white
             self.screen.fill(c.WHITE)
@@ -101,6 +103,8 @@ class Game:
                 if not bubble.bubble_popping:
                     for bug in bugs:
                         if utils.distance_between(bubble, bug) <= (bubble.size + bug.size) and not bubble.flash_counter:
+                            sound = pygame.mixer.Sound('./assets/sounds/hit.mp3')
+                            sound.play()
                             bubble.destroy_bubble = True
                             health.lose_life()
                             if health.current_health < 1:
