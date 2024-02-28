@@ -42,7 +42,7 @@ class Game:
                         # If it does, remove that bug
                         if bubble is not None:
                             bubble.size *= 1.75
-                            bubble.flash_counter = 1
+                            bubble.bubble_popping = True
                             # Check if the larger bubble covered any bugs
                             for bug in bugs:
                                 if utils.distance_between(bubble, bug) <= (bubble.size + bug.size):
@@ -74,14 +74,18 @@ class Game:
                 bubble.grow_circle_on_click()
                 bubble.update_position(player.x, player.y)
                 bubble.draw(self.screen)
-                # Handle bubble bug intersection
-                for bug in bugs:
-                    if utils.distance_between(bubble, bug) <= (bubble.size + bug.size) and not bubble.flash_counter:
-                        bubble.destroy_bubble = True
-                        health.lose_life()
-                        break
                 if bubble.destroy_bubble:
                     bubble = None
+            if bubble is not None:
+                # Handle bubble bug intersection
+                if not bubble.bubble_popping:
+                    for bug in bugs:
+                        if utils.distance_between(bubble, bug) <= (bubble.size + bug.size) and not bubble.flash_counter:
+                            bubble.destroy_bubble = True
+                            health.lose_life()
+                            if health.current_health < 1:
+                                self.running = False
+                            break
                     
             player.draw(self.screen)
 
