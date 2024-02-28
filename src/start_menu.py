@@ -2,7 +2,7 @@ import pygame
 import sys
 from game import Game
 
-class MainMenu:
+class StartMenu:
     def __init__(self, screen):
         pygame.init()
         self.screen = screen

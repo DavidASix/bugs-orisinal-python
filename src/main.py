@@ -1,6 +1,6 @@
 import pygame
 from game import Game
-from main_menu import MainMenu
+from start_menu import StartMenu
 
 def main():
     pygame.init()
@@ -9,7 +9,7 @@ def main():
 
     # Create a Game instance and start the game loop
     #game = Game(screen)
-    main_menu = MainMenu(screen)
+    main_menu = StartMenu(screen)
     main_menu.start()
     # Quit Pygame
     pygame.quit()
