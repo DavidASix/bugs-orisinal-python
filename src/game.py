@@ -2,6 +2,7 @@ import pygame
 import math
 import utilities as utils
 import os
+import sys
 
 from player import Player
 from bubble import Bubble
@@ -38,6 +39,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                    sys.exit()
                 # Handle user inputs
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
@@ -51,7 +53,7 @@ class Game:
                         # If it does, remove that bug
                         if bubble is not None:
                             bubble.size *= 1.75
-                            bubble.bubble_popping = True
+                            bubble.popping = True
                             # Check if the larger bubble covered any bugs
                             for bug in bugs:
                                 if utils.distance_between(bubble, bug) <= (bubble.size + bug.size):
@@ -62,9 +64,6 @@ class Game:
 
             while len(bugs) < 20:
                 bugs.append(Bug(width, height))
-            music_file = './assets/sounds/loop.mp3'
-            pygame.mixer.music.load(music_file)
-            pygame.mixer.music.play(-1)
 
             # Fill the background with white
             self.screen.fill(c.WHITE)
@@ -89,9 +88,8 @@ class Game:
             self.last_mouse_pos = pygame.mouse.get_pos()
             player.move_toward_mouse(height, current_mouse_pos)
 
-            # Bubble Logic
+            # Bubble drawing logic
             if bubble is not None:
-                bubble.show_flash_on_release()
                 bubble.grow_circle_on_click()
                 bubble.update_position(player.x, player.y)
                 bubble.draw(self.play_field)
@@ -100,9 +98,19 @@ class Game:
 
             # Handle bubble bug intersection
             if bubble is not None:
-                if not bubble.bubble_popping:
+                if bubble.popping:
+                    # TODO: on bubble pop (mouse button release)
+                    bubble.handle_bubble_pop()
+                if not bubble.popping:
                     for bug in bugs:
                         if utils.distance_between(bubble, bug) <= (bubble.size + bug.size) and not bubble.flash_counter:
+                            # TODO: on bug interaction
+                            # Play scratch anim at bug location
+                            # Play ouch jump anim at player location
+                            # make player invincible for 2 seconds
+                            # Lose life
+                            # Play ouch sound
+                            # Reduce health
                             sound = pygame.mixer.Sound('./assets/sounds/hit.mp3')
                             sound.play()
                             bubble.destroy_bubble = True
@@ -126,3 +134,4 @@ class Game:
             # Update the display
             pygame.display.flip()
             self.clock.tick(c.FPS)
+        return score_board.score
