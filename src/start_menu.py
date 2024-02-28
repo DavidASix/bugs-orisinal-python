@@ -1,6 +1,7 @@
 import pygame
 import sys
 import pickle
+import os
 from game import Game
 
 import constants as c
@@ -13,9 +14,16 @@ class StartMenu:
         self.start_button = pygame.Rect(200, 200, int(self.screen.get_width() / 3), 50)
         self.exit_button = pygame.Rect(200, 300, int(self.screen.get_width() / 3), 50)
         self.hover_button = False
-        self.final_score = None
+        self.final_score = 2
         self.screen_width, self.screen_height = screen.get_size()
         self.high_score = 0
+
+        current_dir = os.path.dirname(__file__)
+        image_path = os.path.join(current_dir, f'assets/frames/start.png')
+        self.start_bg = pygame.image.load(image_path)
+        image_path = os.path.join(current_dir, f'assets/frames/score.png')
+        self.score_bg = pygame.image.load(image_path)
+
         self.load_high_score()
 
     def load_high_score(self):
@@ -34,59 +42,71 @@ class StartMenu:
             self.high_score = final_score
             self.save_high_score()
 
+    def btn_color(self, btn):
+        if self.hover_button == btn:
+            return (50, 50, 50)
+        else:
+            return (40, 40, 40)
+    
     def draw_start_menu(self):
-        self.screen.fill((20, 20, 20))
-        title = pygame.font.Font(None, 72).render("BUG GAME", True, (255, 255, 255))
-        self.screen.blit(title, (self.screen.get_width() // 2 - title.get_width() // 2, 50))
+        self.screen.fill((255, 255, 255))
+        start_bg = pygame.transform.smoothscale(self.start_bg, self.screen.get_size())
+        self.screen.blit(start_bg, (0,0))
 
-        def btn_color(btn):
-            if self.hover_button == btn:
-                return (50, 50, 50)
-            else:
-                return (40, 40, 40)
-        
-        self.start_button = pygame.Rect(200, 200, int(self.screen.get_width() / 3), 50)
-        pygame.draw.rect(self.screen, btn_color(self.start_button), self.start_button)
-        start_text = pygame.font.Font(None, 26).render("Start Game", True, (255, 255, 255))
-        self.screen.blit(start_text, (self.start_button.centerx - start_text.get_width() // 2, self.start_button.centery - start_text.get_height() // 2))
 
-        self.exit_button = pygame.Rect(200, 300, int(self.screen.get_width() / 3), 50)
-        pygame.draw.rect(self.screen, btn_color(self.exit_button), self.exit_button)
-        exit_text = pygame.font.Font(None, 26).render("Exit", True, (255, 255, 255))
-        self.screen.blit(exit_text, (self.exit_button.centerx - exit_text.get_width() // 2, self.exit_button.centery - exit_text.get_height() // 2))
+        btn_font = pygame.font.Font(None, 26)
+
+        # Draw the new game button
+        self.start_button = pygame.Rect(self.screen_width / 2 - self.screen_width / 6, self.screen_height / 2, self.screen_width / 3, 50)
+        pygame.draw.rect(self.screen, self.btn_color(self.start_button), self.start_button)
+        new_game_text = btn_font.render("New Game", True, (255, 255, 255))
+        new_game_rect = new_game_text.get_rect(center=self.start_button.center)
+        self.screen.blit(new_game_text, new_game_rect)
+
+        # Draw the exit button
+        self.exit_button = pygame.Rect(self.screen_width / 2 - self.screen_width / 6, self.screen_height / 2 + 70, self.screen_width / 3, 50)
+        pygame.draw.rect(self.screen, self.btn_color(self.exit_button), self.exit_button)
+        exit_text = btn_font.render("Exit", True, (255, 255, 255))
+        exit_rect = exit_text.get_rect(center=self.exit_button.center)
+        self.screen.blit(exit_text, exit_rect)
 
 
     def draw_score_menu(self):
-        self.screen.fill((0, 0, 0))  # Clear the screen
+        self.screen.fill((255, 255, 255))
+        score_bg = pygame.transform.smoothscale(self.score_bg, self.screen.get_size())
+        self.screen.blit(score_bg, (0,0))
 
+        text_color = (40, 40, 40)
         # Draw the title
         title_font = pygame.font.Font(None, 72)
-        title_text = title_font.render("Bug Game", True, (255, 255, 255))
+        score_font = pygame.font.Font(None, 36)
+        btn_font = pygame.font.Font(None, 26)
+
+        title_text = title_font.render("Bug Game", True, text_color)
         title_rect = title_text.get_rect(center=(self.screen_width / 2, self.screen_height / 4))
         self.screen.blit(title_text, title_rect)
 
         # Draw the final score
-        score_font = pygame.font.Font(None, 36)
-        score_text = score_font.render(f"Final Score: {self.final_score}", True, (255, 255, 255))
+        score_text = score_font.render(f"Final Score: {self.final_score}", True, text_color)
         score_rect = score_text.get_rect(center=(self.screen_width / 2, self.screen_height / 2 - 50))
         self.screen.blit(score_text, score_rect)
 
         # Draw the top score
-        top_score_text = score_font.render(f"Top Score: {self.high_score}", True, (255, 255, 255))
+        top_score_text = score_font.render(f"Top Score: {self.high_score}", True, text_color)
         top_score_rect = top_score_text.get_rect(center=(self.screen_width / 2, self.screen_height / 2))
         self.screen.blit(top_score_text, top_score_rect)
 
         # Draw the new game button
         self.start_button = pygame.Rect(self.screen_width / 2 - self.screen_width / 6, self.screen_height / 2 + 50, self.screen_width / 3, 50)
-        pygame.draw.rect(self.screen, (0, 255, 0), self.start_button)
-        new_game_text = score_font.render("New Game", True, (255, 255, 255))
+        pygame.draw.rect(self.screen, self.btn_color(self.start_button), self.start_button)
+        new_game_text = btn_font.render("New Game", True, (255, 255, 255))
         new_game_rect = new_game_text.get_rect(center=self.start_button.center)
         self.screen.blit(new_game_text, new_game_rect)
 
         # Draw the exit button
         self.exit_button = pygame.Rect(self.screen_width / 2 - self.screen_width / 6, self.screen_height / 2 + 120, self.screen_width / 3, 50)
-        pygame.draw.rect(self.screen, (255, 0, 0), self.exit_button)
-        exit_text = score_font.render("Exit", True, (255, 255, 255))
+        pygame.draw.rect(self.screen, self.btn_color(self.exit_button), self.exit_button)
+        exit_text = btn_font.render("Exit", True, (255, 255, 255))
         exit_rect = exit_text.get_rect(center=self.exit_button.center)
         self.screen.blit(exit_text, exit_rect)
 
