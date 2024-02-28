@@ -1,6 +1,7 @@
 import pygame
 import math
 import utilities as utils
+import os
 
 from player import Player
 from bubble import Bubble
@@ -18,6 +19,12 @@ class Game:
         self.last_mouse_pos = None
         self.play_field = pygame.Surface(screen.get_size())
         self.overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        current_dir = os.path.dirname(__file__)
+        background_path = os.path.join(current_dir, f'assets/sprites/background.png')
+        overlay_path = os.path.join(current_dir, f'assets/sprites/overlay.png')
+        self.background_image = pygame.image.load(background_path)
+        self.overlay_image = pygame.image.load(overlay_path)
+
 
     def game_loop(self):
         width, height = self.screen.get_size()
@@ -61,10 +68,13 @@ class Game:
             self.screen.fill(c.WHITE)
             # Draw the clipping mask overlay
             pygame.draw.ellipse(self.overlay, (255, 255, 255, 255), (0, 0, *self.screen.get_size()))
+
             # Fill the play field (which will be drawn below clipping mask)
             # This is done to hide the previous frames
             self.play_field.fill((250, 250, 250))
-            
+            background_image = pygame.transform.smoothscale(self.background_image, self.screen.get_size())
+            self.play_field.blit(background_image, (0,0))
+
             ## BUGLOGIC
             for bug in bugs:
                 bug.move()
@@ -98,14 +108,17 @@ class Game:
                             break
                     
             player.draw(self.play_field)
+            overlay_image = pygame.transform.smoothscale(self.overlay_image, self.screen.get_size())
+            self.play_field.blit(overlay_image, (0,0))
             # Blit the play_field onto the overlay (below clipping mask)
             self.overlay.blit(self.play_field, (0,0), special_flags=pygame.BLEND_RGBA_MIN)
+
             # Blit the overlay onto the screen
             self.screen.blit(self.overlay, (0,0))
             # Draw the UI
             health.draw(self.screen)
             score_board.draw(self.screen)
-            
+
             # Update the display
             pygame.display.flip()
             self.clock.tick(c.FPS)

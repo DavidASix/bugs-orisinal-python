@@ -1,6 +1,7 @@
 import pygame
 import math
 import constants as c
+import os
 
 class Bubble:
     def __init__(self):
@@ -11,6 +12,9 @@ class Bubble:
         self.flash_counter = 0
         self.bubble_popping = False
         self.destroy_bubble = False
+        current_dir = os.path.dirname(__file__)
+        image_path = os.path.join(current_dir, f'assets/sprites/bubble/pink.png')
+        self.bubble_image = pygame.image.load(image_path).convert_alpha()
 
     # Handle growth of circle
     def grow_circle_on_click(self):
@@ -18,9 +22,10 @@ class Bubble:
             self.size = min(self.size + c.INCREMENT_SIZE, c.MAX_CIRCLE_SIZE)
 
     def draw(self, screen):
-        temp_surface = pygame.Surface((self.size*2, self.size*2), pygame.SRCALPHA)
-        pygame.draw.circle(temp_surface, self.color + (230,), (self.size, self.size), self.size)  # 128 is the alpha value
-        screen.blit(temp_surface, (self.x-self.size, self.y-self.size))
+        # Load the sprite image
+        bubble_size = self.size * 2 - 1
+        image = pygame.transform.smoothscale(self.bubble_image, (bubble_size, bubble_size))
+        screen.blit(image, (self.x-self.size, self.y-self.size))
 
     def update_position(self, x, y):
         self.x = x
