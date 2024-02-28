@@ -52,15 +52,7 @@ class Game:
                         # If not, increase the bubble size, start it flashing, and check if it intersects any bugs
                         # If it does, remove that bug
                         if bubble is not None:
-                            bubble.size *= 1.75
-                            bubble.popping = True
-                            # Check if the larger bubble covered any bugs
-                            for bug in bugs:
-                                if utils.distance_between(bubble, bug) <= (bubble.size + bug.size):
-                                    print('Squished Bug!')
-                                    bugs.remove(bug)
-                                    score_board.increase()
-                                    #bug = None
+                            bubble.player_jumping = True
 
             while len(bugs) < 20:
                 bugs.append(Bug(width, height))
@@ -82,6 +74,7 @@ class Game:
                 bug.draw(self.play_field)
                 
             # Player Logic
+            player.jumping = bubble.player_jumping if bubble else False
             # Get the mouse position and update player facing direction
             current_mouse_pos = pygame.mouse.get_pos()
             player.update_direction(self.last_mouse_pos, current_mouse_pos)
@@ -98,25 +91,26 @@ class Game:
 
             # Handle bubble bug intersection
             if bubble is not None:
-                if bubble.popping:
-                    # TODO: on bubble pop (mouse button release)
-                    bubble.handle_bubble_pop()
-                if not bubble.popping:
+                if bubble.player_jumping:
+                    squished_bugs = bubble.handle_bubble_pop(bugs)
+                    if squished_bugs is not None:
+                        for bug in squished_bugs:
+                            bugs.remove(bug)
+                            score_board.increase()
+                            #bug = None
+                # Damage calculation for bug bubble interaction
+                # Only calculate damage if the bubble is not popping (player not jumping)
+                # and bubble is not flashing (bubble has not burst yet)
+                if not bubble.player_jumping and bubble.flash is None:
                     for bug in bugs:
-                        if utils.distance_between(bubble, bug) <= (bubble.size + bug.size) and not bubble.flash_counter:
+                        if utils.distance_between(bubble, bug) <= (bubble.size + bug.size) and not bubble.jump_time:
                             # TODO: on bug interaction
                             # Play scratch anim at bug location
                             # Play ouch jump anim at player location
                             # make player invincible for 2 seconds
-                            # Lose life
-                            # Play ouch sound
-                            # Reduce health
-                            sound = pygame.mixer.Sound('./assets/sounds/hit.mp3')
-                            sound.play()
                             bubble.destroy_bubble = True
                             health.lose_life()
-                            if health.current_health < 1:
-                                self.running = False
+                            self.running = health.current_health > 0
                             break
                     
             player.draw(self.play_field)
