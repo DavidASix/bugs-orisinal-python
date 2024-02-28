@@ -16,10 +16,10 @@ class Bug:
             (random.randint(0, self.screen_width), self.screen_height + 20),
         ]
         self.x, self.y = initial_states[state_seed]
-        self.speed = 1.25 # pixels per frame to move
+        self.speed = 1.15 # pixels per frame to move
         self.angle = random.randint(0, 360)
         self.color = ['red', 'blue', 'green', 'yellow', 'orange'][random.randint(0, 4)]
-        self.size = 20
+        self.size = 15
         current_dir = os.path.dirname(__file__)
         image_path = os.path.join(current_dir, f'assets/sprites/bugs/{self.color}.png')
         self.image = pygame.transform.scale(pygame.image.load(image_path), (self.size, self.size))

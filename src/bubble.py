@@ -15,6 +15,13 @@ class Bubble:
         current_dir = os.path.dirname(__file__)
         image_path = os.path.join(current_dir, f'assets/sprites/bubble/pink.png')
         self.bubble_image = pygame.image.load(image_path).convert_alpha()
+        self.glare_sprites = []
+        for i in range(1, 6):
+            image = pygame.image.load(os.path.join(current_dir, f'./assets/sprites/bubble_glare/{i}.png'))
+            self.glare_sprites.append(image)
+        self.glare_animation_index = 0
+        self.glare_delay = 100  # milliseconds
+        self.last_glare_update = pygame.time.get_ticks()
 
     # Handle growth of circle
     def grow_circle_on_click(self):
@@ -22,10 +29,21 @@ class Bubble:
             self.size = min(self.size + c.INCREMENT_SIZE, c.MAX_CIRCLE_SIZE)
 
     def draw(self, screen):
-        # Load the sprite image
+        # Load the sprite image        # Load the sprite image
         bubble_size = self.size * 2 - 1
         image = pygame.transform.smoothscale(self.bubble_image, (bubble_size, bubble_size))
         screen.blit(image, (self.x-self.size, self.y-self.size))
+
+        # Draw the glare animation
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_glare_update > self.glare_delay:
+            print('Update Glare')
+            self.glare_animation_index = (self.glare_animation_index + 1) % len(self.glare_sprites)
+            self.last_glare_update = current_time
+        glare_size = bubble_size*0.5
+        glare_image = self.glare_sprites[self.glare_animation_index]
+        glare_image = pygame.transform.smoothscale(glare_image, (glare_size, glare_size))
+        screen.blit(glare_image, (self.x - bubble_size*0.0625, self.y  - bubble_size*0.0625))
 
     def update_position(self, x, y):
         self.x = x
