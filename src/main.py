@@ -1,11 +1,11 @@
 import pygame
 from game import Game
 from start_menu import StartMenu
+import constants as c
 
 def main():
     pygame.init()
-    WIDTH, HEIGHT = 600, 600
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((c.WIDTH, c.HEIGHT))
 
     # Create a Game instance and start the game loop
     #game = Game(screen)

@@ -1,7 +1,7 @@
 # Game Variables
 FPS = 60
 
-WIDTH, HEIGHT = 600, 600
+WIDTH, HEIGHT = 500, 500
 
 # Colors
 WHITE = (255, 255, 255)
