@@ -14,10 +14,12 @@ class Player:
 
         self.direction = "S"
 
+        self.moving = False
         self.jumping = False
         self.invincible = 0
         self.ouch_animation = None
         self.jump_animation = None
+        self.moving_animation_index = 0
         self.play_field = pygame.Surface(screen.get_size())
 
         # Load sprites
@@ -62,11 +64,7 @@ class Player:
         if abs(angle - closest_direction) <= direction_buffer:
             self.direction = direction_ranges[closest_direction]
         else:
-            self.direction = 'N'  # Set to North for all other angles within the buffer around 0/360
-        print(f'Direction is: {self.direction}')
-
-
-
+            self.direction = 'N' 
     
     def move_toward_mouse(self, frame_height, current_mouse_pos):
         # Setup circular boundary for player
@@ -75,14 +73,16 @@ class Player:
 
         target_x, target_y = current_mouse_pos
         # Player should take 2.5 seconds to go from top to bottom of frame
-        frame_speed = frame_height / 4 / c.FPS
+        frame_speed = frame_height / 3.75 / c.FPS
         distance = math.hypot(target_x - self.x, target_y - self.y)
         # distance is compared against frame height to account for any variance
         # in movement when the frame is larger.
         if distance > math.floor(frame_height / 200):
+            self.moving = True
             self.x += (target_x - self.x) * frame_speed / distance
             self.y += (target_y - self.y) * frame_speed / distance
-
+        else:
+            self.moving = False
         # Check if the player is outside the circle
         player_distance = math.hypot(self.x - circle_center[0], self.y - circle_center[1])
         if player_distance > circle_radius:
@@ -94,9 +94,13 @@ class Player:
         directions = ['N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW']
         if self.direction in directions:
             diameter = self.size * 2
-            image = self.walking_animations[self.direction][0]
+            image = self.walking_animations[self.direction][self.moving_animation_index]
             image = pygame.transform.smoothscale(image, (diameter, diameter))
             self.screen.blit(image, (int(self.x - self.size), int(self.y - self.size)))
+            # Update animation frame
+            if self.moving:
+                self.moving_animation_index += 1
+                self.moving_animation_index %= len(self.walking_animations[self.direction])
         else:
             # Handle the case where self.direction is not a valid direction
             self.color = c.RED if self.jumping else c.GREEN
