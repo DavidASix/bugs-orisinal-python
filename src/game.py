@@ -79,7 +79,7 @@ class Game:
             player.jumping = bubble.player_jumping if bubble else False
             # Get the mouse position and update player facing direction
             current_mouse_pos = pygame.mouse.get_pos()
-            player.update_direction(self.last_mouse_pos, current_mouse_pos)
+            player.update_direction()
             self.last_mouse_pos = pygame.mouse.get_pos()
             player.move_toward_mouse(height, current_mouse_pos)
 
