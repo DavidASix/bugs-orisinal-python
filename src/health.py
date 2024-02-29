@@ -18,3 +18,5 @@ class Health:
     def lose_life(self):
         if self.current_health > 0:
             self.current_health -= 1
+            sound = pygame.mixer.Sound('./assets/sounds/hit.mp3')
+            sound.play()

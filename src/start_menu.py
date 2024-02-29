@@ -14,7 +14,7 @@ class StartMenu:
         self.start_button = pygame.Rect(200, 200, int(self.screen.get_width() / 3), 50)
         self.exit_button = pygame.Rect(200, 300, int(self.screen.get_width() / 3), 50)
         self.hover_button = False
-        self.final_score = 2
+        self.final_score = None
         self.screen_width, self.screen_height = screen.get_size()
         self.high_score = 0
 

@@ -20,9 +20,9 @@ class Game:
         self.last_mouse_pos = None
         self.play_field = pygame.Surface(screen.get_size())
         self.overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        current_dir = os.path.dirname(__file__)
-        background_path = os.path.join(current_dir, f'assets/sprites/background.png')
-        overlay_path = os.path.join(current_dir, f'assets/sprites/overlay.png')
+        self.current_dir = os.path.dirname(__file__)
+        background_path = os.path.join(self.current_dir, f'assets/sprites/background.png')
+        overlay_path = os.path.join(self.current_dir, f'assets/sprites/overlay.png')
         self.background_image = pygame.image.load(background_path)
         self.overlay_image = pygame.image.load(overlay_path)
 
@@ -34,6 +34,12 @@ class Game:
         bugs = []
         health = Health(3)
         score_board = ScoreBoard(None, width)
+
+        # Load and play the music
+        music_path = os.path.join(self.current_dir, f'assets/sounds/loop.mp3')
+        pygame.mixer.music.load(music_path)
+        pygame.mixer.music.play(-1)  # Play the music indefinitely
+
         while self.running:
             # Event handling
             for event in pygame.event.get():
@@ -104,6 +110,8 @@ class Game:
                 if bubble.player_jumping:
                     squished_bugs = bubble.handle_bubble_pop(bugs)
                     if squished_bugs is not None:
+                        sound = pygame.mixer.Sound(os.path.join(self.current_dir, f'assets/sounds/jump.mp3'))
+                        sound.play()
                         for bug in squished_bugs:
                             bugs.remove(bug)
                             score_board.increase()
