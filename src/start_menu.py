@@ -11,11 +11,12 @@ class StartMenu:
         pygame.init()
         self.screen = screen
         self.clock = pygame.time.Clock()
-        self.start_button = pygame.Rect(200, 200, int(self.screen.get_width() / 3), 50)
-        self.exit_button = pygame.Rect(200, 300, int(self.screen.get_width() / 3), 50)
-        self.hover_button = False
-        self.final_score = None
         self.screen_width, self.screen_height = screen.get_size()
+        self.start_button = pygame.Rect(self.screen_width / 2 - self.screen_width / 6, self.screen_height / 2, self.screen_width / 3, 50)
+        self.exit_button = pygame.Rect(self.screen_width / 2 - self.screen_width / 6, self.screen_height / 2 + 70, self.screen_width / 3, 50)
+        self.hover_button = False
+        
+        self.final_score = 1
         self.high_score = 0
 
         current_dir = os.path.dirname(__file__)
@@ -42,45 +43,50 @@ class StartMenu:
             self.high_score = final_score
             self.save_high_score()
 
-    def btn_color(self, btn):
-        if self.hover_button == btn:
-            return (50, 50, 50)
-        else:
-            return (40, 40, 40)
+    def btn_surface(self, btn):
+        button_surface = pygame.Surface(btn.size)
+        button_surface.set_alpha(0)  # Transparent
+        return button_surface
     
+    def btn_hover(self, btn):
+        if self.hover_button == btn:
+            return c.ACCENT_HOVER
+        else:
+            return c.ACCENT
+
     def draw_start_menu(self):
-        self.screen.fill((255, 255, 255))
+        self.screen.fill((255, 0, 0))
         start_bg = pygame.transform.smoothscale(self.start_bg, self.screen.get_size())
         self.screen.blit(start_bg, (0,0))
 
-
-        btn_font = pygame.font.Font(None, 26)
+        btn_font = pygame.font.Font('./assets/fonts/FuturaHandwritten.ttf', 26)
 
         # Draw the new game button
-        self.start_button = pygame.Rect(self.screen_width / 2 - self.screen_width / 6, self.screen_height / 2, self.screen_width / 3, 50)
-        pygame.draw.rect(self.screen, self.btn_color(self.start_button), self.start_button)
-        new_game_text = btn_font.render("New Game", True, (255, 255, 255))
+        pygame.draw.rect(self.btn_surface(self.start_button), (255, 0, 0), self.start_button)
+        self.screen.blit(self.btn_surface(self.start_button), self.start_button)
+        # Draw the new game text
+        new_game_text = btn_font.render("play game", True, self.btn_hover(self.start_button))
         new_game_rect = new_game_text.get_rect(center=self.start_button.center)
         self.screen.blit(new_game_text, new_game_rect)
 
         # Draw the exit button
-        self.exit_button = pygame.Rect(self.screen_width / 2 - self.screen_width / 6, self.screen_height / 2 + 70, self.screen_width / 3, 50)
-        pygame.draw.rect(self.screen, self.btn_color(self.exit_button), self.exit_button)
-        exit_text = btn_font.render("Exit", True, (255, 255, 255))
+        pygame.draw.rect(self.btn_surface(self.exit_button), (255,0,0), self.exit_button)
+        self.screen.blit(self.btn_surface(self.exit_button), self.exit_button)
+        # Draw the exit text
+        exit_text = btn_font.render("exit game", True, self.btn_hover(self.exit_button))
         exit_rect = exit_text.get_rect(center=self.exit_button.center)
         self.screen.blit(exit_text, exit_rect)
-
 
     def draw_score_menu(self):
         self.screen.fill((255, 255, 255))
         score_bg = pygame.transform.smoothscale(self.score_bg, self.screen.get_size())
         self.screen.blit(score_bg, (0,0))
 
-        text_color = (40, 40, 40)
+        text_color = c.ACCENT
         # Draw the title
-        title_font = pygame.font.Font(None, 72)
-        score_font = pygame.font.Font(None, 36)
-        btn_font = pygame.font.Font(None, 26)
+        title_font = pygame.font.Font('./assets/fonts/FuturaHandwritten.ttf', 72)
+        score_font = pygame.font.Font('./assets/fonts/FuturaHandwritten.ttf', 36)
+        btn_font = pygame.font.Font('./assets/fonts/FuturaHandwritten.ttf', 26)
 
         title_text = title_font.render("Bug Game", True, text_color)
         title_rect = title_text.get_rect(center=(self.screen_width / 2, self.screen_height / 4))
@@ -98,15 +104,17 @@ class StartMenu:
 
         # Draw the new game button
         self.start_button = pygame.Rect(self.screen_width / 2 - self.screen_width / 6, self.screen_height / 2 + 50, self.screen_width / 3, 50)
-        pygame.draw.rect(self.screen, self.btn_color(self.start_button), self.start_button)
-        new_game_text = btn_font.render("New Game", True, (255, 255, 255))
+        pygame.draw.rect(self.btn_surface(self.start_button), (255, 0, 0), self.start_button)
+        self.screen.blit(self.btn_surface(self.start_button), self.start_button)
+        new_game_text = btn_font.render("play game", True, self.btn_hover(self.start_button))
         new_game_rect = new_game_text.get_rect(center=self.start_button.center)
         self.screen.blit(new_game_text, new_game_rect)
 
         # Draw the exit button
         self.exit_button = pygame.Rect(self.screen_width / 2 - self.screen_width / 6, self.screen_height / 2 + 120, self.screen_width / 3, 50)
-        pygame.draw.rect(self.screen, self.btn_color(self.exit_button), self.exit_button)
-        exit_text = btn_font.render("Exit", True, (255, 255, 255))
+        pygame.draw.rect(self.btn_surface(self.exit_button), (255,0,0), self.exit_button)
+        self.screen.blit(self.btn_surface(self.exit_button), self.exit_button)
+        exit_text = btn_font.render("exit game", True, self.btn_hover(self.exit_button))
         exit_rect = exit_text.get_rect(center=self.exit_button.center)
         self.screen.blit(exit_text, exit_rect)
 
