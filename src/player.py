@@ -2,41 +2,38 @@ import pygame
 import math
 import os
 
+import utilities as utils
 import constants as c
 
 class Player:
     def __init__(self, screen):
         self.screen = screen
-        self.size = 25
-        self.x = (c.WIDTH + self.size) / 2
-        self.y = (c.HEIGHT + self.size) / 2
+        self.radius = 25
+        self.height = self.radius * 2
+        self.width = self.radius // 1.25 * 2
+
+        self.x = (c.WIDTH + self.radius) / 2
+        self.y = (c.HEIGHT + self.radius) / 2
 
         self.direction = "S"
 
         self.moving = False
         self.jumping = False
         self.invincible = 0
-        self.jump_timer = 1
-        self.jump_index = 0
-        self.ouch_animation = None
-        self.moving_animation_index = 0
-        self.play_field = pygame.Surface(screen.get_size())
 
         # Load sprites
         directions = ['N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW']
         self.walking_animations = {}
         for direction in directions:
             animation_folder = f'./assets/sprites/player/{direction}'
-            self.walking_animations[direction] = []
-            for i in range(1, 16):
-                image_path = f'{animation_folder}/{i}.png'
-                image = pygame.image.load(image_path)
-                self.walking_animations[direction].append(image)
-        
-        self.jumping_frames = []
-        for i in range(32):
-            image_path = f'./assets/sprites/player/jump/{i+1}.png'
-            self.jumping_frames.append(pygame.image.load(image_path))
+            self.walking_animations[direction] = utils.preload_images(animation_folder)
+
+        self.jumping_frames = utils.preload_images('./assets/sprites/player/jump')
+        self.shadow_frames = utils.preload_images('./assets/sprites/player/shadow')
+        self.static_shadow = pygame.image.load(os.path.join('./assets/sprites/player/shadow', f'1.png'))
+        self.walking_start_tick = None
+        self.jumping_start_tick = None
+        self.shadow_start_tick = None
 
 
     def update_direction(self):
@@ -95,50 +92,70 @@ class Player:
             self.x -= (self.x - circle_center[0]) * (player_distance - circle_radius) / player_distance
             self.y -= (self.y - circle_center[1]) * (player_distance - circle_radius) / player_distance
     
-    def calculate_jump(self):
-        if self.jumping:
-            # Calculate length of animation and current frame to display
-            jump_length = 0.75
-            jump_frame_length = c.FPS * jump_length
-            jump_frame_interval = jump_frame_length / (len(self.jumping_frames) -1)
-            self.jump_index = math.floor(self.jump_timer / jump_frame_interval)
+    def play_shadow_animation(self, ticks):
+        if self.shadow_start_tick:
+            # The animation is 1 seconds long
+            animation_duration = 0.75 * c.FPS
+            image = utils.get_animation_frame(self.shadow_frames, ticks, self.shadow_start_tick, animation_duration)
+            #print(image)
+            if image is None:
+                #self.shadow_starting_tick = None
+                print('image is none')
+            else:
+                size = self.radius * 2.75
+                image = pygame.transform.smoothscale(image, (size, size))
+                self.screen.blit(image, (int(self.x - (size/2)), int(self.y - (size/2))))
 
-            # Increment timer
-            if (self.jump_timer < jump_frame_length):
-                self.jump_timer += 1
+    def play_jump_animation(self, ticks):
+        animation_duration = 0.75 * c.FPS
+        # Setup image
+        image = utils.get_animation_frame(self.jumping_frames, ticks, self.jumping_start_tick, animation_duration)
+        if image is None:
+            print('jump image is none')
         else:
-            self.jump_timer = 0
-    
+            image = pygame.transform.smoothscale(image, (self.width * 2.25, self.height * 2.25))
+            self.screen.blit(image, (int(self.x - self.width * 1.125), int(self.y - self.height * 1.525)))
+
+    def play_walking_animation(self, ticks):
+        # Render Shadow
+        size = self.radius * 2.75
+        self.static_shadow = pygame.transform.smoothscale(self.static_shadow, (size, size))
+        self.screen.blit(self.static_shadow, (int(self.x - (size/2)), int(self.y - (size/2))))
+
+        # Render walking animation
+        animation_duration = 0.75 * c.FPS
+        image = utils.get_animation_frame_looped(self.walking_animations[self.direction], ticks, self.walking_start_tick, animation_duration)
+        image = pygame.transform.smoothscale(image, (self.width, self.height))
+
+        self.screen.blit(image, (int(self.x - self.width / 2), int(self.y - self.height / 2)))
+        
+
     def animation(self):
-        directions = ['N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW']
-        # Handle jumping animation
+        ticks = math.floor(pygame.time.get_ticks() / 1000 * 60)
+
+        # Handle jumping and shadow animation
         if self.jumping:
-            height = self.size * 4.5
-            width = self.size * 4.5 * 0.75
-            # Setup image
-            image = self.jumping_frames[self.jump_index]
-            image = pygame.transform.smoothscale(image, (width, height))
-            self.screen.blit(image, (int(self.x - (width/2)), int(self.y - (height/3*2))))
-            # Handle walking animation
-        elif self.direction in directions:
-            height = self.size * 2.25
-            width = self.size * 2.25 * 0.75
-            image = self.walking_animations[self.direction][self.moving_animation_index]
-            image = pygame.transform.smoothscale(image, (width, height))
-            self.screen.blit(image, (int(self.x - (width / 2)), int(self.y - (height / 2))))
-            # Update animation frame
-            if self.moving:
-                self.moving_animation_index += 1
-                self.moving_animation_index %= len(self.walking_animations[self.direction])
-        # Handle the case where self.direction is not a valid direction
+            self.shadow_start_tick = ticks if self.shadow_start_tick is None else self.shadow_start_tick
+            self.jumping_start_tick = ticks if self.jumping_start_tick is None else self.jumping_start_tick
+            self.play_shadow_animation(ticks)
+            self.play_jump_animation(ticks)
         else:
-            pygame.draw.circle(self.screen, c.GREEN, (int(self.x), int(self.y)), self.size)
+            self.shadow_start_tick = None
+            self.jumping_start_tick = None
+
+        # Handle walking animation
+        if not self.jumping:
+            self.walking_start_tick = ticks if self.walking_start_tick is None else self.walking_start_tick
+            if not self.moving:
+                self.walking_start_tick = ticks
+            self.play_walking_animation(ticks)
+        else:
+            self.walking_start_tick = None
 
     def draw(self):
         flashing_seconds = 3
         flashing_frames = flashing_seconds * c.FPS
         flashing_interval = 3
-        self.calculate_jump()
         # If the player is invincible, flash every 3 frames for 3 seconds
         if self.invincible and self.invincible < flashing_frames:
             if self.invincible % flashing_interval == 0:  
