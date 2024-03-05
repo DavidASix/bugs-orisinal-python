@@ -75,16 +75,20 @@ class Player:
 
         target_x, target_y = current_mouse_pos
         # Player should take 2.5 seconds to go from top to bottom of frame
-        frame_speed = frame_height / 3.5 / c.FPS
+        speed = 1 if self.jumping else 3.5
+        frame_speed = frame_height / speed / c.FPS
         distance = math.hypot(target_x - self.x, target_y - self.y)
-        # distance is compared against frame height to account for any variance
-        # in movement when the frame is larger.
-        if distance > math.floor(frame_height / 200):
+
+        if self.jumping and distance <= 5:
+            self.x = target_x
+            self.y = target_y
+        elif distance > math.floor(frame_height / 200):
             self.moving = True
             self.x += (target_x - self.x) * frame_speed / distance
             self.y += (target_y - self.y) * frame_speed / distance
         else:
             self.moving = False
+
         # Check if the player is outside the circle
         player_distance = math.hypot(self.x - circle_center[0], self.y - circle_center[1])
         if player_distance > circle_radius:
